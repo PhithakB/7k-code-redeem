@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven Knights Rebirth (GB) - Auto Coupon Redemption</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: #2c5364;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title h2 {
+            color: #1a1a1a;
+            font-size: 2em;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .title h3 {
+            color: #555;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-section h4 {
+            color: #2c5364;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .form-section p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2c5364;
+            box-shadow: 0 0 0 3px rgba(44, 83, 100, 0.1);
+        }
+
+        .btn-redeem {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2c5364 0%, #0f2027 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-redeem:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(44, 83, 100, 0.4);
+        }
+
+        .btn-redeem:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .coupon-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .coupon-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .coupon-item.pending {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .coupon-item.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .coupon-item.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .coupon-status {
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .summary.active {
+            display: block;
+        }
+
+        .summary h4 {
+            color: #2c5364;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-number.success {
+            color: #28a745;
+        }
+
+        .stat-number.error {
+            color: #dc3545;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .update-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            color: #1976d2;
+            font-size: 0.85em;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2c5364;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RedemCoupon 7KRebirth</h1>
+        </div>
+
+        <div class="title">
+            <h2>⚔️ Seven Knights Rebirth (GB)</h2>
+            <h3>Coupon Redemption</h3>
+        </div>
+
+        <div class="subtitle">
+            แลกคูปองอัตโนมัติได้เลย
+        </div>
+
+        <div class="form-section">
+            <h4>ข้อมูลผู้เล่น</h4>
+            <p>กรุณากรอกข้อมูลของคุณเพื่อแลกคูปอง</p>
+
+            <form id="redeemForm">
+                <div class="form-group">
+                    <label for="uid">UID</label>
+                    <input 
+                        type="text" 
+                        id="uid" 
+                        placeholder="กรอก UID ของคุณ" 
+                        required
+                        autocomplete="off">
+                </div>
+
+                <button type="submit" class="btn-redeem" id="submitBtn">
+                    แลกคูปองทั้งหมด
+                </button>
+            </form>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+
+            <div class="coupon-list" id="couponList"></div>
+        </div>
+
+        <div class="summary" id="summary">
+            <h4>🎉 สรุปผลการแลกคูปอง</h4>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-number success" id="successCount">0</div>
+                    <div class="stat-label">สำเร็จ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number error" id="errorCount">0</div>
+                    <div class="stat-label">ล้มเหลว</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="update-note">
+            <strong>--V1.0--</strong> อัพเดท 08/01/2026<br>
+            • เพิ่มโค้ดใหม่ทั้งหมด 19 โค้ด<br>
+            • รองรับ API Netmarble อย่างเป็นทางการ
+        </div>
+    </div>
+
+    <script>
+        // รายการคูปองที่ยังใช้งานได้ (อัพเดท 08/01/2026)
+        const COUPON_CODES = [
+            'HAPPYNEWYEAR2026',
+            '7S7E7V7E7N7',
+            'GRACEOFCHAOS',
+            'BRANZEBRANSEL',
+            'DANCINGPOOKI',
+            'CHAOSESSENCE',
+            'POOKIFIVEKINDS',
+            'SENAHAJASENA',
+            '77EVENT77',
+            '100MILLIONHEARTS',
+            'KEYKEYKEY',
+            'LETSGO7K',
+            'GOLDENKINGPEPE',
+            'HALFGOODHALFEVIL',
+            'TARGETWISH',
+            'OBLIVION',
+            'DELLONSVSKRIS',
+            'SENASTARCRYSTAL',
+            'SENA77MEMORY'
+        ];
+
+        const NETMARBLE_API = 'https://coupon.netmarble.com/api/tskgb/coupon/use';
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        document.getElementById('redeemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const uid = document.getElementById('uid').value.trim();
+            
+            if (!uid || uid.length < 5) {
+                alert('❌ UID ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+                return;
+            }
+
+            // Reset counters
+            successCount = 0;
+            errorCount = 0;
+
+            // Show progress container
+            const progressContainer = document.getElementById('progressContainer');
+            const submitBtn = document.getElementById('submitBtn');
+            const summary = document.getElementById('summary');
+            
+            progressContainer.classList.add('active');
+            summary.classList.remove('active');
+            submitBtn.disabled = true;
+            
+            const couponListEl = document.getElementById('couponList');
+            couponListEl.innerHTML = '';
+
+            // Process each coupon
+            for (let i = 0; i < COUPON_CODES.length; i++) {
+                const couponCode = COUPON_CODES[i];
+                const progress = ((i + 1) / COUPON_CODES.length) * 100;
+                
+                // Update progress bar
+                updateProgress(progress);
+
+                // Add coupon item
+                const itemId = `coupon-${i}`;
+                addCouponItem(itemId, couponCode, 'pending');
+
+                // Try to redeem
+                try {
+                    const result = await redeemCoupon(uid, couponCode);
+                    
+                    if (result.success) {
+                        updateCouponItem(itemId, 'success', '✅ สำเร็จ');
+                        successCount++;
+                    } else {
+                        updateCouponItem(itemId, 'error', `❌ ${result.message || 'ล้มเหลว'}`);
+                        errorCount++;
+                    }
+                } catch (error) {
+                    updateCouponItem(itemId, 'error', '❌ เกิดข้อผิดพลาด');
+                    errorCount++;
+                }
+
+                // Delay between requests to avoid rate limiting
+                if (i < COUPON_CODES.length - 1) {
+                    await delay(1000);
+                }
+            }
+
+            // Show summary
+            submitBtn.disabled = false;
+            showSummary();
+        });
+
+        async function redeemCoupon(memberId, couponCode) {
+            try {
+                const response = await fetch(NETMARBLE_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'memberId': memberId,
+                        'couponCode': couponCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                return {
+                    success: data.resultCode === 'SUCCESS' || data.success === true || response.ok,
+                    message: data.resultMessage || data.message
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    message: error.message
+                };
+            }
+        }
+
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = Math.round(percent) + '%';
+        }
+
+        function addCouponItem(id, code, status) {
+            const couponListEl = document.getElementById('couponList');
+            const item = document.createElement('div');
+            item.id = id;
+            item.className = `coupon-item ${status}`;
+            item.innerHTML = `
+                <span class="coupon-code">${code}</span>
+                <span class="coupon-status"><div class="spinner"></div> กำลังแลก...</span>
+            `;
+            couponListEl.appendChild(item);
+            
+            // Scroll to bottom
+            couponListEl.scrollTop = couponListEl.scrollHeight;
+        }
+
+        function updateCouponItem(id, status, statusText) {
+            const item = document.getElementById(id);
+            if (item) {
+                item.className = `coupon-item ${status}`;
+                item.querySelector('.coupon-status').innerHTML = statusText;
+            }
+        }
+
+        function showSummary() {
+            const summary = document.getElementById('summary');
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('errorCount').textContent = errorCount;
+            summary.classList.add('active');
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Validate UID input
+        document.getElementById('uid').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+</body>
+</html>
