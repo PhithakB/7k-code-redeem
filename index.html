@@ -380,7 +380,9 @@
             'SENA77MEMORY'
         ];
 
-        const NETMARBLE_API = 'https://coupon.netmarble.com/api/tskgb/coupon/use';
+        // ใช้ Proxy API แทนการเรียกตรง (เพื่อแก้ปัญหา CORS)
+        const PROXY_API = '/api/redeem'; // สำหรับ Vercel
+        // หรือใช้: 'https://your-project.vercel.app/api/redeem'
 
         let successCount = 0;
         let errorCount = 0;
@@ -452,24 +454,25 @@
 
         async function redeemCoupon(memberId, couponCode) {
             try {
-                const response = await fetch(NETMARBLE_API, {
+                const response = await fetch(PROXY_API, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
                     },
-                    body: new URLSearchParams({
-                        'memberId': memberId,
-                        'couponCode': couponCode
+                    body: JSON.stringify({
+                        memberId: memberId,
+                        couponCode: couponCode
                     })
                 });
 
                 const data = await response.json();
                 
                 return {
-                    success: data.resultCode === 'SUCCESS' || data.success === true || response.ok,
-                    message: data.resultMessage || data.message
+                    success: data.success === true,
+                    message: data.message || 'ไม่ทราบสถานะ'
                 };
             } catch (error) {
+                console.error('Redeem error:', error);
                 return {
                     success: false,
                     message: error.message
