@@ -380,9 +380,10 @@
             'SENA77MEMORY'
         ];
 
-        // ใช้ Proxy API แทนการเรียกตรง (เพื่อแก้ปัญหา CORS)
-        const PROXY_API = '/api/redeem'; // สำหรับ Vercel
-        // หรือใช้: 'https://your-project.vercel.app/api/redeem'
+        // ⚠️ สำคัญ: ต้อง Deploy บน Vercel เท่านั้น ไม่สามารถเปิดไฟล์ HTML โดยตรงได้
+        // เปลี่ยน URL นี้เป็น URL ของ Vercel project ของคุณ
+        const PROXY_API = '/api/redeem'; 
+        // ตัวอย่าง: 'https://7k-coupon.vercel.app/api/redeem'
 
         let successCount = 0;
         let errorCount = 0;
